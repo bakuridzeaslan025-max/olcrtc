@@ -87,6 +87,7 @@ Ready-made examples:
 | `data` | optional: directory holding `names`/`surnames` files that override the built-in display-name dictionaries. Resolved relative to the YAML file |
 | `debug` | verbose logging |
 | `stats.listen` | loopback address serving `GET /stats` with per-key byte totals, e.g. `127.0.0.1:9464`; empty disables |
+| `access_log` | server only: a FIFO the server writes an access line to for every stream it opens and every new UDP destination of a session (see [Access lines](#access-lines)). Resolved relative to the YAML file; empty, the default, writes nothing |
 
 `crypto.key_file` is read relative to the YAML file. You cannot set `crypto.key` and `crypto.key_file` at the same time.
 
@@ -122,6 +123,24 @@ route:
 A server never opens a TCP connection or a UDP flow for a client into its own host or its networks: loopback, private, link-local (cloud metadata included), shared CGNAT space (`100.64.0.0/10`), multicast, reserved and the other ranges Xray's freedom outbound refuses by default. A name is resolved once and judged by every address it resolves to - one refused address refuses the target - and the checked address itself is dialed, so the name is never resolved a second time. An IPv4-mapped IPv6 address is judged as the IPv4 address it reaches. With `socks.proxy_addr` a name goes to the proxy unresolved, for the proxy to resolve under its own policy; only a literal address is judged.
 
 Without `debug` the server's log names no destination: a failed connect says why (`blocked target`, `no such host`, `connection refused`, ...) but not where, and the `traffic:` line carries the session and the byte counts. `debug: true` adds the target to every connect.
+
+## Access lines
+
+An operator's agent can count what the users of an exit open, to tell abuse from use, and for Xray it reads Xray's own access lines. With `access_log` a server writes the same lines for olcRTC, to the FIFO at that path:
+
+```yaml
+access_log: /run/olcrtc/access.fifo
+```
+
+It writes one line for every stream it opens, once the dial to the destination has succeeded (a target the egress policy refuses, or that does not answer, has no line), and one for every UDP destination a session had not used before. The line is Xray's access line:
+
+```text
+2026/11/03 15:04:05.123456 from olcrtc accepted tcp:example.com:443 [olcrtc-telemost -> direct] email: 0123456789abcdef@olcrtc
+```
+
+`udp:` stands for a UDP destination, `telemost` is the carrier of the instance (`auth.provider`), and the email is the key's id: the first 16 hex characters of the sha256 of the key's 32 bytes, the id `/stats` counts the key under, never the key. The line names no client address. A session's UDP destinations are remembered up to 4096; past that, a destination the set does not hold is written each time a flow to it opens.
+
+The path must be a FIFO, and the server opens it only if it is one: `stat`, then `open` with `O_WRONLY|O_NONBLOCK`. With no process reading it, or on any other error, the server writes no line and tries again at most every 10 seconds; a write that finds the pipe full drops the line, and a reader that leaves is waited for the same way. Every line is one write of at most 512 bytes, so a reader gets whole lines. Nothing waits for the reader: a reader that stalls costs lines, never speed. The server writes a destination to this FIFO and nowhere else - not to stderr, not to the debug log - and with no `access_log` it behaves exactly as it did.
 
 ## Config schema migration
 

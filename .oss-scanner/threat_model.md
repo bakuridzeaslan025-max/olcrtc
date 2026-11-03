@@ -46,6 +46,10 @@ The layers, from the wire up:
   reserved target; a name is resolved once and the checked address is the one
   dialled), counts bytes per key (`meter.go`) and serves the counts to the
   host's own agent on a loopback HTTP listener (`GET /stats`, `stats.listen`).
+  With `access_log` it also writes an Xray-form line per stream and per new UDP
+  destination of a session to a FIFO the host's own agent reads (`access.go`):
+  the line names the key by its id and never by the key, nothing waits on the
+  reader, and the access log writes a destination to that FIFO and nowhere else.
 - **Client** (`internal/client`): the SOCKS5 server (CONNECT, UDP ASSOCIATE,
   optional username and password), direct rules (`internal/route`) and
   server-name sniffing for tun2socks setups (`internal/sniff`).
@@ -74,7 +78,9 @@ The layers, from the wire up:
    must not reach the server host's own networks (loopback, private,
    link-local, cloud metadata) through the egress policy, see or disturb other
    key holders' sessions, exhaust what they share (the UDP flow table, memory,
-   goroutines, file descriptors), or move its bytes onto another key's count.
+   goroutines, file descriptors), move its bytes onto another key's count, or
+   write a line of its own into the access log through a destination it picks
+   (a host that is not a plain name or address is not written).
 4. **A server, against its clients.** A malicious server operator sees the
    traffic it lets out, as any VPN exit does. It must not be able to run code
    on a client, exhaust it, or reach the client's local network through it.
