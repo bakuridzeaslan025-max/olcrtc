@@ -181,6 +181,10 @@ func (s *Server) getOrCreateUDPFlow(
 	s.udpFlows[key] = flow
 	s.udpMu.Unlock()
 
+	// ai-generated: the access line of a destination the session had not used
+	// (access_log). The flow that won the race to be made is the one that
+	// writes it, and a refused target never got here.
+	s.access.udp(sessionID, endpoint.Host, endpoint.Port)
 	go s.readUDPFlow(flow)
 	return flow, nil
 }

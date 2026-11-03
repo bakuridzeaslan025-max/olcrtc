@@ -54,6 +54,19 @@ func (m *meter) bind(sessionID, keyID string) {
 	m.mu.Unlock()
 }
 
+// keyOf is the id of the key a session was bound to, or "" for a session that
+// was not: the access log (access.go) names its streams by it.
+//
+// ai-generated: the whole method (access_log).
+func (m *meter) keyOf(sessionID string) string {
+	if m == nil {
+		return ""
+	}
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	return m.sessionKey[sessionID]
+}
+
 // add attributes a finished stream's byte counts to the session's key. A
 // session with no bound key is silently skipped.
 func (m *meter) add(sessionID string, up, down uint64) {

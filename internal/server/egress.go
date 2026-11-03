@@ -211,6 +211,9 @@ func (s *Server) dispatch(ctx context.Context, stream *smux.Stream, request Conn
 	}
 	defer func() { _ = conn.Close() }()
 	logger.Debugf("sid=%d connected %s in %v", stream.ID(), addr, elapsed)
+	// ai-generated: the access line of a stream that is open (access_log); a
+	// refused dial returned above and has none.
+	s.access.tcp(sessionID, request.Addr, request.Port)
 	if _, err := stream.Write([]byte{tunnelcore.ConnectAckOK}); err != nil {
 		return
 	}
