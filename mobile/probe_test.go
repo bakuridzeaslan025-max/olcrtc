@@ -42,13 +42,13 @@ func TestCheckLetsListenArbitrateFixedPort(t *testing.T) {
 		t.Fatalf("WaitReady() error = %v", err)
 	}
 	<-configs
-	_, err := runtime.Check("jitsi", transportVP8, testRoom, "device", testKey, port, 100, 30, 64)
+	_, err := runtime.Check(testProvider, transportVP8, testRoom, "device", testKey, port, 100, 30, 64)
 	var opErr *net.OpError
 	if !errors.As(err, &opErr) {
 		t.Fatalf("Check(active port) error = %v, want bind error", err)
 	}
 	<-configs
-	latency, err := runtime.Check("jitsi", transportVP8, testRoom, "device", testKey, 0, 100, 30, 64)
+	latency, err := runtime.Check(testProvider, transportVP8, testRoom, "device", testKey, 0, 100, 30, 64)
 	if err != nil {
 		t.Fatalf("Check(ephemeral port) error = %v", err)
 	}
@@ -73,7 +73,7 @@ func TestCheckSupportsEveryTransport(t *testing.T) {
 		return ctx.Err()
 	})
 	for _, transport := range []string{transportData, transportVP8, transportSEI, transportVideo} {
-		if _, err := runtime.Check("jitsi", transport, testRoom, "device", testKey, 0, 100, 30, 64); err != nil {
+		if _, err := runtime.Check(testProvider, transport, testRoom, "device", testKey, 0, 100, 30, 64); err != nil {
 			t.Fatalf("Check(%q) error = %v", transport, err)
 		}
 		cfg := <-configs
@@ -88,11 +88,11 @@ func TestCheckTimeoutAndRunnerError(t *testing.T) {
 		<-ctx.Done()
 		return ctx.Err()
 	})
-	if _, err := runtime.Check("jitsi", transportData, testRoom, "device", testKey, 0, 1, 0, 0); !errors.Is(err, ErrReadyTimeout) {
+	if _, err := runtime.Check(testProvider, transportData, testRoom, "device", testKey, 0, 1, 0, 0); !errors.Is(err, ErrReadyTimeout) {
 		t.Fatalf("Check(timeout) error = %v, want %v", err, ErrReadyTimeout)
 	}
 	runtime.runner = func(context.Context, client.Config, func(string)) error { return errTestRun }
-	if _, err := runtime.Check("jitsi", transportData, testRoom, "device", testKey, 0, 100, 0, 0); !errors.Is(err, errTestRun) {
+	if _, err := runtime.Check(testProvider, transportData, testRoom, "device", testKey, 0, 100, 0, 0); !errors.Is(err, errTestRun) {
 		t.Fatalf("Check(runner error) = %v, want %v", err, errTestRun)
 	}
 }
@@ -125,7 +125,7 @@ func TestConcurrentEphemeralProbesReportActiveAddresses(t *testing.T) {
 
 	for range probeCount {
 		runtime := configuredRuntime(t, listeningProbeRunner)
-		cfg, err := runtime.probeConfig("jitsi", transportData, testRoom, "device", testKey, 0, 0, 0)
+		cfg, err := runtime.probeConfig(testProvider, transportData, testRoom, "device", testKey, 0, 0, 0)
 		if err != nil {
 			t.Fatalf("probeConfig() error = %v", err)
 		}

@@ -1,3 +1,5 @@
+//go:build !olcrtc_vkcalls
+
 package builtin_test
 
 import (

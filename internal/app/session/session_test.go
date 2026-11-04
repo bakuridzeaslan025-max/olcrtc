@@ -13,6 +13,7 @@ import (
 
 	"github.com/openlibrecommunity/olcrtc/internal/control"
 	enginebuiltin "github.com/openlibrecommunity/olcrtc/internal/engine/builtin"
+	"github.com/openlibrecommunity/olcrtc/internal/engine/builtin/builtintest"
 	"github.com/openlibrecommunity/olcrtc/internal/runtime"
 	"github.com/openlibrecommunity/olcrtc/internal/transport"
 	"github.com/openlibrecommunity/olcrtc/internal/tunnelcore"
@@ -27,6 +28,7 @@ func TestRegisterDefaultsConcurrent(t *testing.T) {
 	}
 	wg.Wait()
 
+	builtintest.RequireProviders(t, "jitsi", "none", "telemost", "wbstream")
 	for _, name := range []string{"jitsi", "none", "telemost", "wbstream"} {
 		if !slices.Contains(enginebuiltin.Available(), name) {
 			t.Fatalf("provider %q is not registered", name)
@@ -158,6 +160,7 @@ func TestRunWithSessionRotationRestartsAfterMaxDuration(t *testing.T) {
 }
 
 func TestPrepareRunConfigAppliesDefaultsThenValidates(t *testing.T) {
+	builtintest.RequireProviders(t, "telemost")
 	RegisterDefaults()
 	cfg, err := prepareRunConfig(Config{
 		Mode:      ModeSrv,
@@ -185,6 +188,7 @@ func TestPrepareRunConfigAppliesDefaultsThenValidates(t *testing.T) {
 }
 
 func TestValidate(t *testing.T) {
+	builtintest.RequireProviders(t, "telemost")
 	RegisterDefaults()
 
 	base := Config{
@@ -654,6 +658,7 @@ func TestValidate(t *testing.T) {
 const testProviderWBStream = "wbstream"
 
 func TestValidateGen(t *testing.T) {
+	builtintest.RequireProviders(t, "wbstream")
 	RegisterDefaults()
 
 	tests := []struct {

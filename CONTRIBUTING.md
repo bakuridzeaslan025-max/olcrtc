@@ -29,6 +29,7 @@ ceremony.
 ```bash
 go build ./...
 go test ./...                    # and with -tags olcrtc_lean, the phone build
+go test -tags olcrtc_lean,olcrtc_vkcalls ./...  # the vkcalls-only phone build
 go test -race ./internal/...     # before sending anything touching concurrency
 golangci-lint run ./...
 ```

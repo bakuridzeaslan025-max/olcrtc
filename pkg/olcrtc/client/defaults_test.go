@@ -51,9 +51,9 @@ func runDefaultsHelper(t *testing.T, constructor string) {
 	}
 	wg.Wait()
 
-	requireRegistryNames(t, "auth providers", auth.Available(), []string{"jitsi", "max", "mtslink", "salutejazz", "telemost", "vkcalls", "wbstream"})
-	requireRegistryNames(t, "provider factories", enginebuiltin.Available(), []string{"jitsi", "max", "mtslink", "none", "salutejazz", "telemost", "vkcalls", "wbstream"})
-	requireRegistryNames(t, "engines", engine.Available(), expectedEngines())
+	requireRegistryNames(t, "auth providers", auth.Available(), registeredBy([]string{"jitsi", "max", "mtslink", "salutejazz", "telemost", "vkcalls", "wbstream"}))
+	requireRegistryNames(t, "provider factories", enginebuiltin.Available(), registeredBy([]string{"jitsi", "max", "mtslink", "none", "salutejazz", "telemost", "vkcalls", "wbstream"}))
+	requireRegistryNames(t, "engines", engine.Available(), registeredBy(expectedEngines()))
 	if constructor == "engineconn" {
 		requireRegistryNames(t, "transports", transport.Available(), nil)
 		return

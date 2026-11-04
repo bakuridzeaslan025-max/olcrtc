@@ -18,8 +18,8 @@ import (
 func TestEveryProviderThisBuildRegistersCanBeSelected(t *testing.T) {
 	client.RegisterDefaults()
 	available := enginebuiltin.Available()
-	if !slices.Contains(available, "salutejazz") {
-		t.Fatalf("this build registers %v, and salutejazz is not among them", available)
+	if !slices.Contains(available, providerSureToRegister) {
+		t.Fatalf("this build registers %v, and %s is not among them", available, providerSureToRegister)
 	}
 	runtime := New()
 	for _, provider := range available {

@@ -58,7 +58,7 @@ func TestSettersBuildPublicClientConfig(t *testing.T) {
 	if !ok {
 		t.Fatalf("TransportOptions type = %T, want client.VideoOptions", cfg.TransportOptions)
 	}
-	if cfg.Provider != "jitsi" || cfg.Transport != transportVideo || cfg.RoomURL != testRoom ||
+	if cfg.Provider != testProvider || cfg.Transport != transportVideo || cfg.RoomURL != testRoom ||
 		cfg.ChannelID != "channel" || cfg.ProviderToken != "token" || cfg.DeviceID != "device" ||
 		cfg.DeviceIDPath != "/tmp/device" || cfg.LocalAddr != "127.0.0.1:19080" ||
 		cfg.SOCKSUser != "user" || cfg.SOCKSPass != "pass" ||
@@ -111,7 +111,7 @@ func TestStartValidatesRequiredConfiguration(t *testing.T) {
 	if err := runtime.Start(); !errors.Is(err, ErrInvalidConfig) {
 		t.Fatalf("Start() error = %v, want %v", err, ErrInvalidConfig)
 	}
-	if err := runtime.SetProvider("jitsi"); err != nil {
+	if err := runtime.SetProvider(testProvider); err != nil {
 		t.Fatalf("SetProvider() error = %v", err)
 	}
 	if err := runtime.SetRoom(testRoom); err != nil {

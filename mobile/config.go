@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/openlibrecommunity/olcrtc/internal/engine"
+	enginebuiltin "github.com/openlibrecommunity/olcrtc/internal/engine/builtin"
 	"github.com/openlibrecommunity/olcrtc/internal/logger"
 	"github.com/openlibrecommunity/olcrtc/internal/protect"
 	"github.com/openlibrecommunity/olcrtc/internal/route"
@@ -562,17 +563,12 @@ func validateDNSEntry(entry string) error {
 	return nil
 }
 
-// supportedProvider reports whether an app may name this provider. It is the
-// phone side's own list of what the bind offers, and every provider
-// RegisterDefaults wires has to be on it: one that is in the binary and not
-// here cannot be selected at all.
+// supportedProvider reports whether an app may name this provider: exactly the
+// providers RegisterDefaults wired into this build, so a build tag that leaves
+// one out (olcrtc_vkcalls) makes SetProvider refuse it rather than the session
+// fail at start. New registers them before any Runtime exists.
 func supportedProvider(provider string) bool {
-	switch provider {
-	case "jitsi", "telemost", "wbstream", "salutejazz", "vkcalls", "mtslink", "max", providerNone:
-		return true
-	default:
-		return false
-	}
+	return slices.Contains(enginebuiltin.Available(), provider)
 }
 
 func supportedTransport(transport string) bool {

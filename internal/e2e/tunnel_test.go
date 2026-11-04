@@ -27,6 +27,7 @@ import (
 	"github.com/openlibrecommunity/olcrtc/internal/control"
 	"github.com/openlibrecommunity/olcrtc/internal/engine"
 	enginebuiltin "github.com/openlibrecommunity/olcrtc/internal/engine/builtin"
+	"github.com/openlibrecommunity/olcrtc/internal/engine/builtin/builtintest"
 	"github.com/openlibrecommunity/olcrtc/internal/server"
 	"github.com/openlibrecommunity/olcrtc/internal/supervisor"
 	"github.com/openlibrecommunity/olcrtc/internal/transport"
@@ -1250,6 +1251,7 @@ func connectViaSOCKS(t *testing.T, socksAddr, targetAddr string) net.Conn {
 }
 
 func TestBuiltInProviderTransportMatrixValidates(t *testing.T) {
+	builtintest.RequireProviders(t, builtInProviderNames()...)
 	session.RegisterDefaults()
 
 	for _, mode := range []string{"srv", "cnc"} {

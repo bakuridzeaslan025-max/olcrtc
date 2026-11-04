@@ -21,7 +21,7 @@ var errTestRun = errors.New("test runner failed")
 func configuredRuntime(t *testing.T, runner clientRunner) *Runtime {
 	t.Helper()
 	runtime := newRuntime(runner)
-	if err := runtime.SetProvider("jitsi"); err != nil {
+	if err := runtime.SetProvider(testProvider); err != nil {
 		t.Fatalf("SetProvider() error = %v", err)
 	}
 	if err := runtime.SetRoom(testRoom); err != nil {

@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/openlibrecommunity/olcrtc/internal/app/session"
+	"github.com/openlibrecommunity/olcrtc/internal/engine/builtin/builtintest"
 	"github.com/openlibrecommunity/olcrtc/internal/logger"
 	"github.com/openlibrecommunity/olcrtc/internal/supervisor"
 )
@@ -103,6 +104,7 @@ func TestRunWithConfigRejectsInvalidConfig(t *testing.T) {
 const testKeyHex = "0000000000000000000000000000000000000000000000000000000000000001"
 
 func TestRunWithConfigRejectsUnreadableDataOverride(t *testing.T) {
+	builtintest.RequireProviders(t, "jitsi")
 	session.RegisterDefaults()
 
 	scfg := session.Config{
@@ -121,6 +123,7 @@ func TestRunWithConfigRejectsUnreadableDataOverride(t *testing.T) {
 }
 
 func TestRunWithArgsSuccessfulSessionReturn(t *testing.T) {
+	builtintest.RequireProviders(t, "jitsi")
 	dir := t.TempDir()
 	if err := os.WriteFile(filepath.Join(dir, "names"), []byte("A\n"), 0o600); err != nil {
 		t.Fatalf("WriteFile(names) error = %v", err)
@@ -170,6 +173,7 @@ data: `+dir+`
 }
 
 func TestRunWithArgsAppliesTransportDefaults(t *testing.T) {
+	builtintest.RequireProviders(t, "wbstream")
 	dir := t.TempDir()
 	if err := os.WriteFile(filepath.Join(dir, "names"), []byte("A\n"), 0o600); err != nil {
 		t.Fatalf("WriteFile(names) error = %v", err)
@@ -207,6 +211,7 @@ data: `+dir+`
 }
 
 func TestRunWithArgsFailoverProfiles(t *testing.T) {
+	builtintest.RequireProviders(t, "wbstream", "jitsi")
 	dir := t.TempDir()
 	if err := os.WriteFile(filepath.Join(dir, "names"), []byte("A\n"), 0o600); err != nil {
 		t.Fatalf("WriteFile(names) error = %v", err)

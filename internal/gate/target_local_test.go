@@ -15,6 +15,7 @@ import (
 
 	"github.com/openlibrecommunity/olcrtc/internal/app/session"
 	"github.com/openlibrecommunity/olcrtc/internal/config"
+	"github.com/openlibrecommunity/olcrtc/internal/engine/builtin/builtintest"
 )
 
 // ai-generated: whole file, unit cover for the local target: its plan, its
@@ -74,6 +75,7 @@ debug: true
 // way cmd/olcrtc does, strict loader and validation included, so a key the
 // schema does not know or a value it refuses fails here, not in a live run.
 func TestRenderedConfigsPassTheEnginesOwnLoader(t *testing.T) {
+	builtintest.RequireProviders(t, "jitsi", "wbstream", "salutejazz")
 	session.RegisterDefaults()
 	key := strings.Repeat("cd", 32)
 	for _, ep := range []Endpoint{

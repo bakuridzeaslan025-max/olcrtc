@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/openlibrecommunity/olcrtc/internal/engine/builtin/builtintest"
 	"github.com/openlibrecommunity/olcrtc/mobile"
 )
 
@@ -18,6 +19,7 @@ import (
 // is handed is one nobody holds.
 
 func TestMobileClientRefusesABadEndpointBeforeStarting(t *testing.T) {
+	builtintest.RequireProviders(t, "jitsi")
 	cases := []struct {
 		name string
 		edit func(ep *Endpoint)

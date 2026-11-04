@@ -17,6 +17,7 @@ import (
 	"time"
 
 	"github.com/openlibrecommunity/olcrtc/internal/app/session"
+	"github.com/openlibrecommunity/olcrtc/internal/engine/builtin/builtintest"
 )
 
 // ai-generated: the whole file (SIGHUP reloads crypto.keys_file). These
@@ -44,6 +45,7 @@ func hangUpOnSelf(t *testing.T) bool {
 }
 
 func TestSIGHUPAsksTheServerToReadItsKeysFileAgain(t *testing.T) {
+	builtintest.RequireProviders(t, "jitsi")
 	session.RegisterDefaults()
 	keepAlive(t)
 	dir := t.TempDir()
@@ -104,6 +106,7 @@ func (l *lockedLog) String() string {
 // Keys inline or in a single key have no file to read again. SIGHUP says so
 // and the run goes on as it was.
 func TestSIGHUPOfAServerWhoseKeysAreNotInAFileChangesNothing(t *testing.T) {
+	builtintest.RequireProviders(t, "jitsi")
 	session.RegisterDefaults()
 	keepAlive(t)
 	out := &lockedLog{}

@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/openlibrecommunity/olcrtc/internal/app/session"
+	"github.com/openlibrecommunity/olcrtc/internal/engine/builtin/builtintest"
 )
 
 const (
@@ -26,6 +27,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestDocumentationExamplesLoadStrictly(t *testing.T) {
+	builtintest.RequireProviders(t, "jitsi", "max", "mtslink", "none", "salutejazz", "telemost", "wbstream")
 	examplesRoot := filepath.Join("..", "..", "docs", "examples")
 	err := filepath.WalkDir(examplesRoot, func(path string, entry fs.DirEntry, walkErr error) error {
 		if walkErr != nil {
@@ -45,6 +47,7 @@ func TestDocumentationExamplesLoadStrictly(t *testing.T) {
 }
 
 func TestDocumentationYAMLBlocksLoadStrictly(t *testing.T) {
+	builtintest.RequireProviders(t, "jitsi", "max", "mtslink", "none", "salutejazz", "telemost", "wbstream")
 	paths, err := filepath.Glob(filepath.Join("..", "..", "docs", "*.md"))
 	if err != nil {
 		t.Fatalf("glob documentation: %v", err)
