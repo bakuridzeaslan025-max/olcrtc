@@ -90,6 +90,15 @@ type File struct {
 	//
 	// ai-generated: the field (reload of crypto.keys_file on SIGHUP).
 	KeysPath string `yaml:"-"`
+
+	// AccessLog is the FIFO a server writes an access line to for every stream
+	// it opens and every new UDP destination of a session; empty, the default,
+	// writes none. A relative path is taken against the config file, as
+	// crypto.key_file is, and Load makes it so. Like stats, it is process-wide,
+	// so no failover profile overrides it.
+	//
+	// ai-generated: the field (access_log).
+	AccessLog string `yaml:"access_log"`
 }
 
 // Stats configures the server's loopback /stats listener. It is process-wide
@@ -281,6 +290,7 @@ func loadExternalSecrets(configPath string, file *File) error {
 	}
 
 	file.Crypto = resolved
+	file.AccessLog = resolveBeside(configPath, file.AccessLog)
 
 	if file.Route, err = resolveRoute(configPath, file.Route); err != nil {
 		return err
@@ -300,6 +310,19 @@ func loadExternalSecrets(configPath string, file *File) error {
 	}
 
 	return nil
+}
+
+// resolveBeside is name as the config file sees it: an absolute path stays, a
+// relative one is taken against the directory of the config file, and an empty
+// one stays empty.
+//
+// ai-generated: the whole function (access_log).
+func resolveBeside(configPath, name string) string {
+	if name == "" || filepath.IsAbs(name) {
+		return name
+	}
+
+	return filepath.Join(filepath.Dir(configPath), name)
 }
 
 // resolveRoute reads route.direct_file, relative to the config file, and
@@ -447,6 +470,7 @@ func Apply(file File) session.Config {
 	cfg.Mode = file.Mode
 	cfg.Amount = file.Gen.Amount
 	cfg.StatsListen = file.Stats.Listen
+	cfg.AccessLog = file.AccessLog
 
 	return cfg
 }

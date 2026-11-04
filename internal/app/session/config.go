@@ -163,6 +163,9 @@ type Config struct {
 	Amount                int
 	// StatsListen is the server's loopback /stats address; empty disables it.
 	StatsListen string
+	// AccessLog is the FIFO a server writes its access lines to (server.Config);
+	// empty writes none. ai-generated: the field (access_log).
+	AccessLog string
 	// UDPDisabled turns the SOCKS5 UDP relay off; UDPMaxFlows caps its flows
 	// (0 means the default).
 	UDPDisabled bool

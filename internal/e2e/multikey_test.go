@@ -17,24 +17,28 @@ const (
 )
 
 // ringTunnel is what startRingTunnel brought up: the client's SOCKS address,
-// the server's /stats address (empty unless asked for) and whether the
-// client became ready within its budget.
+// the server's /stats address (empty unless asked for), the name of the
+// provider the pair ran over and whether the client became ready within its
+// budget.
 type ringTunnel struct {
 	socksAddr string
 	statsAddr string
+	provider  string
 	ready     bool
 }
 
 // ringTunnelSpec describes a ring tunnel to bring up: the server's ring and
 // the client's key, the transport (datachannel when empty), whether the
-// server serves /stats, and how long the client gets to become ready. The
-// server's egress policy is lifted, since every target here is a loopback
-// echo server. ai-generated: that last sentence (egress hardening).
+// server serves /stats, the FIFO it writes its access lines to (none when
+// empty), and how long the client gets to become ready. The server's egress
+// policy is lifted, since every target here is a loopback echo server.
+// ai-generated: that sentence (egress hardening) and accessLog (access_log).
 type ringTunnelSpec struct {
 	ring        []string
 	clientKey   string
 	transport   string
 	withStats   bool
+	accessLog   string
 	readyBudget time.Duration
 }
 
@@ -58,6 +62,7 @@ func startRingTunnel(t *testing.T, spec ringTunnelSpec) ringTunnel {
 		_ = server.Run(ctx, server.Config{
 			Transport: transportName, TransportOptions: e2eTransportOptions(transportName),
 			Provider: providerName, RoomURL: testRoom, Keys: spec.ring, StatsListen: statsAddr,
+			AccessLog:                 spec.accessLog,
 			UnsafeAllowPrivateTargets: true, DNSServer: localDNSServer,
 		})
 	}()
@@ -70,7 +75,7 @@ func startRingTunnel(t *testing.T, spec ringTunnelSpec) ringTunnel {
 			DeviceID: testClientDeviceID, LocalAddr: socksAddr, DNSServer: localDNSServer,
 		}, func() { close(ready) })
 	}()
-	tunnel := ringTunnel{socksAddr: socksAddr, statsAddr: statsAddr}
+	tunnel := ringTunnel{socksAddr: socksAddr, statsAddr: statsAddr, provider: providerName}
 	select {
 	case <-ready:
 		tunnel.ready = true

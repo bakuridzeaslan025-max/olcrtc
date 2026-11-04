@@ -92,6 +92,7 @@ func runServer(
 	err = server.Run(ctx, server.Config{
 		Transport: cfg.Transport, Provider: cfg.Provider, RoomURL: roomURL, ChannelID: cfg.ChannelID,
 		KeyHex: cfg.KeyHex, Keys: keys, Reload: cfg.KeyReload, StatsListen: cfg.StatsListen,
+		AccessLog:   cfg.AccessLog, // ai-generated (access_log)
 		UDPDisabled: cfg.UDPDisabled, UDPMaxFlows: cfg.UDPMaxFlows,
 		DNSServer: cfg.DNSServer, DTLSProfile: engine.DTLSProfile(cfg.DTLSProfile), Resolver: cfg.Resolver,
 		SOCKSProxyAddr: cfg.SOCKSProxyAddr, SOCKSProxyPort: cfg.SOCKSProxyPort,

@@ -682,3 +682,64 @@ func TestReadKeysFileFailsOnAFileThatIsGoneOrHoldsNoKey(t *testing.T) {
 		t.Fatalf("ReadKeysFile(no keys) error = %v, want %v", err, ErrCryptoKeyFileEmpty)
 	}
 }
+
+// ai-generated: the tests below (access_log).
+
+const (
+	testAccessLogName = "access.fifo"
+	testAccessLogBody = "mode: srv\naccess_log: "
+)
+
+func TestApplyMapsAccessLog(t *testing.T) {
+	if got := Apply(File{Mode: testModeSrv}).AccessLog; got != "" {
+		t.Fatalf("AccessLog without access_log = %q, want none: the server is the one it was", got)
+	}
+	got := Apply(File{Mode: testModeSrv, AccessLog: "/run/olcrtc/" + testAccessLogName})
+	if got.AccessLog != "/run/olcrtc/"+testAccessLogName {
+		t.Fatalf("AccessLog = %q, want the access_log value", got.AccessLog)
+	}
+}
+
+// An absolute access_log stays as it is; a relative one is taken against the
+// directory of the config file, as crypto.key_file is.
+func TestLoadAccessLogPath(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "olcrtc.yaml")
+
+	writeConfigFile(t, path, testAccessLogBody+"/run/olcrtc/"+testAccessLogName+"\n")
+	f, err := Load(path)
+	if err != nil {
+		t.Fatalf("Load: %v", err)
+	}
+	if f.AccessLog != "/run/olcrtc/"+testAccessLogName {
+		t.Fatalf("AccessLog = %q, want the absolute path as written", f.AccessLog)
+	}
+
+	writeConfigFile(t, path, testAccessLogBody+"run/"+testAccessLogName+"\n")
+	f, err = Load(path)
+	if err != nil {
+		t.Fatalf("Load: %v", err)
+	}
+	if want := filepath.Join(dir, "run", testAccessLogName); f.AccessLog != want {
+		t.Fatalf("AccessLog = %q, want %q: relative to the config file", f.AccessLog, want)
+	}
+
+	writeConfigFile(t, path, "mode: srv\n")
+	f, err = Load(path)
+	if err != nil {
+		t.Fatalf("Load: %v", err)
+	}
+	if f.AccessLog != "" {
+		t.Fatalf("AccessLog = %q, want none when access_log is absent", f.AccessLog)
+	}
+}
+
+// access_log is the server's, like stats: a failover profile is no place for
+// it, and the strict loader says so.
+func TestLoadRejectsAccessLogInAProfile(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "olcrtc.yaml")
+	writeConfigFile(t, path, "mode: srv\nprofiles:\n  - name: one\n    access_log: /run/olcrtc/"+testAccessLogName+"\n")
+	if _, err := Load(path); err == nil {
+		t.Fatal("Load() error = nil, want failure for access_log inside a profile")
+	}
+}

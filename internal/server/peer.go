@@ -778,6 +778,8 @@ func (s *Server) trackPeerOpen(sessionID, deviceID string) {
 }
 
 func (s *Server) trackPeerClose(sessionID, reason string) {
+	// ai-generated: every end of a session comes through here (access_log).
+	s.access.forget(sessionID)
 	s.peersMu.Lock()
 	stat, ok := s.peerStats[sessionID]
 	if !ok {

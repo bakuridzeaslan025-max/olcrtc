@@ -99,6 +99,10 @@ type Server struct {
 	// joined never reads as one a client could pair with.
 	meter *meter
 	link  atomic.Pointer[LinkState]
+	// access writes the access lines of the streams and UDP flows the server
+	// opens (access.go); nil when Config.AccessLog is empty, which is the
+	// server as it was. ai-generated: the field (access_log).
+	access *accessLog
 
 	// unsafeAllowPrivateTargets lifts the egress policy (blockedRanges) for
 	// TCP CONNECT and UDP flows alike; tests only. dialTarget dials a
@@ -146,6 +150,11 @@ type Config struct {
 	// StatsListen, when set, serves GET /stats on this loopback address with
 	// per-key byte totals. Empty disables the listener.
 	StatsListen string
+	// AccessLog, when set, is the FIFO the server writes an access line to for
+	// every stream it opens and every new UDP destination of a session, in
+	// Xray's form with the key id as the email. Empty writes nothing.
+	// ai-generated: the field (access_log).
+	AccessLog string
 	// UDPDisabled turns the SOCKS5 UDP relay off; UDPMaxFlows caps concurrent
 	// flows (0 means the default). UnsafeAllowPrivateTargets lets TCP CONNECT
 	// and UDP flows reach loopback, private, link-local and the other blocked
@@ -213,9 +222,13 @@ func Run(ctx context.Context, cfg Config) error {
 		unsafeAllowPrivateTargets: cfg.UnsafeAllowPrivateTargets || testhooks.AllowPrivateTargets(),
 		udpFlows:                  make(map[serverUDPKey]*serverUDPFlow),
 	}
+	// ai-generated: the access log, which names a stream's key by the meter's
+	// binding (access_log).
+	s.access = newAccessLog(cfg.AccessLog, cfg.Provider, s.meter.keyOf)
 	defer func() {
 		s.shutdown()
 		s.wg.Wait()
+		s.access.close()
 	}()
 	if cfg.StatsListen != "" {
 		s.serveStats(runCtx, cfg.StatsListen)
