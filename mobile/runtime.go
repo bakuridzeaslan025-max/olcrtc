@@ -13,8 +13,7 @@ import (
 	"github.com/openlibrecommunity/olcrtc/internal/supervisor"
 	"github.com/openlibrecommunity/olcrtc/pkg/olcrtc/client"
 
-	_ "golang.org/x/mobile/bind"                       // keep gomobile binding dependencies reachable
-	_ "google.golang.org/genproto/protobuf/field_mask" // keep gomobile on post-split genproto modules
+	_ "golang.org/x/mobile/bind" // keep gomobile binding dependencies reachable
 )
 
 const (
